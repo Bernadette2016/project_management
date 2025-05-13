@@ -7,10 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1bIhrVxyNZqbbv5Jp5Vj64X_FFp_2RZaC
 """
 
-!pip install streamlit
-
-!git clone https://github.com/Bernadette2016/project_management.git
-
 # Commented out IPython magic to ensure Python compatibility.
 # %cd project_management/
 

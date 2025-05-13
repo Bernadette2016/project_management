@@ -108,13 +108,23 @@ selected_users = st.sidebar.multiselect("Users", unique_users)
 if selected_users:
     filtered_df = filtered_df[filtered_df["user_first_name"].isin(selected_users)].copy()
 
-# --- KPIs ---
-st.sidebar.header("Key Performance Indicators")
+# --- KPIs (moved to main content) ---
+st.header("Key Performance Indicators")
 
-total_logged_minutes = filtered_df["minutes"].sum()
-total_logged_hours = round(total_logged_minutes / 60, 2)
-num_unique_tasks = filtered_df["task"].nunique()
-num_log_entries = filtered_df.shape[0]
+col1, col2, col3 = st.columns(3)  # Create three columns for the KPIs
+
+with col1:
+    total_logged_minutes = filtered_df["minutes"].sum()
+    total_logged_hours = round(total_logged_minutes / 60, 2)
+    st.metric("Total Logged Hours", total_logged_hours)
+
+with col2:
+    num_log_entries = filtered_df.shape[0]
+    st.metric("Number of Log Entries", num_log_entries)
+
+with col3:
+    num_unique_tasks = filtered_df["task"].nunique()
+    st.metric("Unique Tasks Performed", num_unique_tasks)
 
 st.sidebar.metric("Total Logged Hours", total_logged_hours)
 st.sidebar.metric("Number of Log Entries", num_log_entries)
@@ -140,10 +150,10 @@ with tab2:
     text = " ".join(filtered_df["description"].astype(str))
     wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
     st.subheader("Word Cloud of Task Descriptions")
-    plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation="bilinear")
-    plt.axis("off")
-    st.pyplot()
+    fig, ax = plt.subplots(figsize=(10, 5))  # Create a Matplotlib figure and axes
+    ax.imshow(wordcloud, interpolation="bilinear")
+    ax.axis("off")
+    st.pyplot(fig)  # Pass the figure object to st.pyplot()
 
 with tab3:
     st.subheader("User Analysis")

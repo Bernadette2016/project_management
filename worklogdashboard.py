@@ -86,17 +86,6 @@ else:
     st.warning("No worklog files found.")
     st.stop()
 
-# Remove this second st.set_page_config() call
-# st.set_page_config(
-#     page_title="Worklog Tracker",
-#     page_icon="📝",  # You can use an emoji or a local file like "favicon.png"
-#     layout="wide",  # Options: "wide" or "centered"
-#     initial_sidebar_state="expanded"  # Options: "auto", "expanded", "collapsed"
-# )
-
-st.title("Welcome to Your Worklog App")
-st.write("Track your tasks, log hours, and analyze work trends easily!")
-
 # --- Sidebar Filters ---
 st.sidebar.header("Filter Your Worklogs")
 

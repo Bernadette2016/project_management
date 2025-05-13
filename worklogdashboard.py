@@ -63,10 +63,6 @@ dfs = {}
 
 # Loop through files and read each one into a DataFrame
 for file in file_names:
-    dfs[file] = pd.read_csv(file)
-
-# Loop through files and read each one into a DataFrame
-for file in file_names:
     try:
         df = pd.read_csv(file)
         # Extract numeric part from filename
@@ -90,12 +86,13 @@ else:
     st.warning("No worklog files found.")
     st.stop()
 
-st.set_page_config(
-    page_title="Worklog Tracker",
-    page_icon="📝",  # You can use an emoji or a local file like "favicon.png"
-    layout="wide",  # Options: "wide" or "centered"
-    initial_sidebar_state="expanded"  # Options: "auto", "expanded", "collapsed"
-)
+# Remove this second st.set_page_config() call
+# st.set_page_config(
+#     page_title="Worklog Tracker",
+#     page_icon="📝",  # You can use an emoji or a local file like "favicon.png"
+#     layout="wide",  # Options: "wide" or "centered"
+#     initial_sidebar_state="expanded"  # Options: "auto", "expanded", "collapsed"
+# )
 
 st.title("Welcome to Your Worklog App")
 st.write("Track your tasks, log hours, and analyze work trends easily!")
@@ -178,4 +175,3 @@ with tab4:
     # You can add more detailed visualizations or tables here
     # For example, a table showing all entries with descriptions
     st.dataframe(filtered_df[["started_at", "user_first_name", "task", "minutes", "description"]])
-

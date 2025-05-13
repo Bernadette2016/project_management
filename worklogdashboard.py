@@ -31,7 +31,7 @@ st.set_page_config(
 page_bg_img = """
 <style>
 [data-testid="stAppViewContainer"] {
-    background-image: url("https://raw.githubusercontent.com/Bernadette2016/project_management/main/patrick-tomasso-ymuAM4S2fxI-unsplash.jpg");
+    background-image: url("https://raw.githubusercontent.com/Bernadette2016/project_management/main/bangkit-ristant-pmhGVEcHrrI-unsplash.jpg");
     background-size: cover;
 }
 </style>

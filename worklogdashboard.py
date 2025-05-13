@@ -31,7 +31,7 @@ st.set_page_config(
 page_bg_img = """
 <style>
 [data-testid="stAppViewContainer"] {
-    background-image: url("https://images.unsplash.com/photo-1542740348-39853c8f42aa");
+    background-image: url("https://unsplash.com/photos/shallow-focus-photography-of-computer-monitor-ymuAM4S2fxI");
     background-size: cover;
 }
 </style>

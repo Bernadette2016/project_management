@@ -209,13 +209,24 @@ with tab2:
     index="weekday", columns="hour", values="minutes", aggfunc="sum", fill_value=0
     )
 
-    # Optional: reorder weekdays
+    st.subheader("Logged Time by Weekday")
+    # Step 1: Prepare data
+    combined_df["weekday"] = combined_df["started_at"].dt.day_name()
+    weekday_minutes = combined_df.groupby("weekday")["minutes"].sum()
+    # Step 2: Reorder weekdays
     ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-    heatmap_data = heatmap_data.reindex(ordered_days)
-    st.subheader("Heatmap of Activity (Minutes Logged by Hour and Day)")
-    fig, ax = plt.subplots(figsize=(12, 5))
-    sns.heatmap(heatmap_data, cmap="YlGnBu", ax=ax)
-    st.pyplot(fig)
+    weekday_minutes = weekday_minutes.reindex(ordered_days).fillna(0)
+    # Step 3: Convert to hours and round
+    weekday_hours = (weekday_minutes / 60).round(2)
+    # Step 4: Allow user to edit values manually
+    edited_hours = {}
+    st.markdown("Adjust the logged hours manually if needed:")
+    for day in ordered_days:
+        default = weekday_hours[day]
+        edited_hours[day] = st.number_input(f"{day} Hours", min_value=0.0, value=float(default), step=0.25)
+    # Step 5: Plot editable bar chart
+    edited_series = pd.Series(edited_hours)
+    st.bar_chart(edited_series)
 
     # Word Cloud of Task Descriptions
     text = " ".join(filtered_df["description"].astype(str))

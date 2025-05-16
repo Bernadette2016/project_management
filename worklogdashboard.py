@@ -163,26 +163,6 @@ with col3:
     num_unique_tasks = filtered_df["task"].nunique()
     st.metric("Unique Tasks Performed", num_unique_tasks)
 
-st.subheader("📅 Weekly Goal Progress")
-# Step 1: Set weekly target
-weekly_target = st.number_input("🎯 Set Weekly Target (Hours)", min_value=1, value=40)
-# Step 2: Create a 'Week' column (ISO week)
-combined_df["week"] = combined_df["started_at"].dt.strftime("%Y-W%U")
-available_weeks = sorted(combined_df["week"].unique())
-# Step 3: Select specific week
-selected_week = st.selectbox("📆 Select a Week", available_weeks)
-# Step 4: Filter data to selected week
-week_df = combined_df[combined_df["week"] == selected_week].copy()
-# Optional: Add user filter
-available_users = combined_df["user_first_name"].dropna().unique()
-selected_user_wk = st.selectbox("👤 Filter by User (Optional)", ["All Users"] + list(sorted(available_users)))
-if selected_user_wk != "All Users":
-    week_df = week_df[week_df["user_first_name"] == selected_user_wk]
-# Step 5: Calculate logged hours
-logged_minutes = week_df["minutes"].sum()
-logged_hours = round(logged_minutes /
-
-
 # Get last 7 days of logs
 weekly_df = filtered_df[filtered_df["started_at"].dt.date >= (pd.to_datetime(end_date) - pd.Timedelta(days=6)).date()]
 weekly_logged = weekly_df["minutes"].sum() / 60
@@ -226,7 +206,7 @@ with tab2:
     )
 
     st.subheader("Logged Time by Weekday")
-    #---- User Filter ---
+    # --- User Filter ---
     user_options = combined_df["user_first_name"].dropna().unique()
     selected_user = st.selectbox("Select a User", options=sorted(user_options))
     # Filter the data by selected user

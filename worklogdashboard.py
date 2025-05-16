@@ -191,7 +191,7 @@ st.sidebar.metric("Number of Log Entries", num_log_entries)
 st.sidebar.metric("Unique Tasks Performed", num_unique_tasks)
 
 # --- Tabbed Content ---
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Raw Data", "Task Analysis", "Logged Time by Weekday", "WordCloud", "User Analysis"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Raw Data", "Task Analysis", "Logged Time by Weekday", "WordCloud", "User Analysis"])
 
 with tab1:
     st.subheader("Raw Worklog Data")

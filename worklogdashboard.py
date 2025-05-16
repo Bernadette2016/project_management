@@ -27,15 +27,43 @@ st.set_page_config(
     initial_sidebar_state="expanded"  # Options: "auto", "expanded", "collapsed"
 )
 
-# Custom CSS for background image
+# Custom CSS for dark theme with background image
 page_bg_img = """
 <style>
 [data-testid="stAppViewContainer"] {
     background-image: url("https://raw.githubusercontent.com/Bernadette2016/project_management/main/bryan-natanael-FnplrKbFEgo-unsplash.jpg");
     background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #ffffff;
+}
+
+/* Darken the background with a semi-transparent overlay */
+[data-testid="stAppViewContainer"]::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.65);  /* Dark overlay */
+    z-index: -1;
+}
+
+.stApp {
+    background-color: transparent;
+}
+
+h1, h2, h3, h4, h5, h6, p, label {
+    color: #ffffff !important;
+}
+
+.css-18e3th9 {
+    background-color: rgba(30, 30, 30, 0.8) !important;
 }
 </style>
 """
+
 
 st.markdown(page_bg_img, unsafe_allow_html=True)
 

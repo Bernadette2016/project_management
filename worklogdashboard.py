@@ -163,9 +163,25 @@ with col3:
     num_unique_tasks = filtered_df["task"].nunique()
     st.metric("Unique Tasks Performed", num_unique_tasks)
 
-# Weekly target tracker
-st.subheader("Weekly Goal Progress")
-weekly_target = st.number_input("Set Weekly Target (Hours)", min_value=1, value=40)
+st.subheader("📅 Weekly Goal Progress")
+# Step 1: Set weekly target
+weekly_target = st.number_input("🎯 Set Weekly Target (Hours)", min_value=1, value=40)
+# Step 2: Create a 'Week' column (ISO week)
+combined_df["week"] = combined_df["started_at"].dt.strftime("%Y-W%U")
+available_weeks = sorted(combined_df["week"].unique())
+# Step 3: Select specific week
+selected_week = st.selectbox("📆 Select a Week", available_weeks)
+# Step 4: Filter data to selected week
+week_df = combined_df[combined_df["week"] == selected_week].copy()
+# Optional: Add user filter
+available_users = combined_df["user_first_name"].dropna().unique()
+selected_user_wk = st.selectbox("👤 Filter by User (Optional)", ["All Users"] + list(sorted(available_users)))
+if selected_user_wk != "All Users":
+    week_df = week_df[week_df["user_first_name"] == selected_user_wk]
+# Step 5: Calculate logged hours
+logged_minutes = week_df["minutes"].sum()
+logged_hours = round(logged_minutes /
+
 
 # Get last 7 days of logs
 weekly_df = filtered_df[filtered_df["started_at"].dt.date >= (pd.to_datetime(end_date) - pd.Timedelta(days=6)).date()]
@@ -210,23 +226,21 @@ with tab2:
     )
 
     st.subheader("Logged Time by Weekday")
+    #---- User Filter ---
+    user_options = combined_df["user_first_name"].dropna().unique()
+    selected_user = st.selectbox("Select a User", options=sorted(user_options))
+    # Filter the data by selected user
+    user_df = combined_df[combined_df["user_first_name"] == selected_user].copy()
     # Step 1: Prepare data
-    combined_df["weekday"] = combined_df["started_at"].dt.day_name()
-    weekday_minutes = combined_df.groupby("weekday")["minutes"].sum()
+    user_df["weekday"] = user_df["started_at"].dt.day_name()
+    weekday_minutes = user_df.groupby("weekday")["minutes"].sum()
     # Step 2: Reorder weekdays
     ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     weekday_minutes = weekday_minutes.reindex(ordered_days).fillna(0)
     # Step 3: Convert to hours and round
     weekday_hours = (weekday_minutes / 60).round(2)
-    # Step 4: Allow user to edit values manually
-    edited_hours = {}
-    st.markdown("Adjust the logged hours manually if needed:")
-    for day in ordered_days:
-        default = weekday_hours[day]
-        edited_hours[day] = st.number_input(f"{day} Hours", min_value=0.0, value=float(default), step=0.25)
-    # Step 5: Plot editable bar chart
-    edited_series = pd.Series(edited_hours)
-    st.bar_chart(edited_series)
+    # Step 4: Plot bar chart
+    st.bar_chart(weekday_hours)
 
     # Word Cloud of Task Descriptions
     text = " ".join(filtered_df["description"].astype(str))
@@ -239,7 +253,6 @@ with tab2:
 
 with tab3:
     st.subheader("User Analysis")
-
     # Time spent per user
     user_minutes = filtered_df.groupby("user_first_name")["minutes"].sum().sort_values(ascending=False)
     user_hours = round(user_minutes / 60, 2)

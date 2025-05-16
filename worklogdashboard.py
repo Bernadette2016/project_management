@@ -111,6 +111,15 @@ if selected_users:
 # --- KPIs (moved to main content) ---
 st.header("Key Performance Indicators")
 
+# Download filtered data
+csv_data = filtered_df.to_csv(index=False).encode("utf-8")
+st.sidebar.download_button(
+    label="📥 Download Filtered Logs",
+    data=csv_data,
+    file_name="filtered_worklog.csv",
+    mime="text/csv"
+)
+
 col1, col2, col3 = st.columns(3)  # Create three columns for the KPIs
 
 with col1:
@@ -125,6 +134,19 @@ with col2:
 with col3:
     num_unique_tasks = filtered_df["task"].nunique()
     st.metric("Unique Tasks Performed", num_unique_tasks)
+
+# Weekly target tracker
+st.subheader("Weekly Goal Progress")
+weekly_target = st.number_input("Set Weekly Target (Hours)", min_value=1, value=40)
+
+# Get last 7 days of logs
+weekly_df = filtered_df[filtered_df["started_at"].dt.date >= (pd.to_datetime(end_date) - pd.Timedelta(days=6)).date()]
+weekly_logged = weekly_df["minutes"].sum() / 60
+progress = min(weekly_logged / weekly_target, 1.0)
+
+st.progress(progress)
+st.write(f"Logged {weekly_logged:.2f} / {weekly_target} hours this week")
+
 
 st.sidebar.metric("Total Logged Hours", total_logged_hours)
 st.sidebar.metric("Number of Log Entries", num_log_entries)
@@ -145,15 +167,27 @@ with tab2:
     task_hours = round(task_minutes / 60, 2)
     st.subheader("Total Time Spent per Task (Hours)")
     st.bar_chart(task_hours)
+    
+    # Daily time spent trend
+    filtered_df["day"] = filtered_df["started_at"].dt.date
+    daily_hours = filtered_df.groupby("day")["minutes"].sum() / 60
+    st.subheader("Daily Time Spent (Hours)")
+    st.line_chart(daily_hours)
 
-    # Word Cloud of Task Descriptions
-    text = " ".join(filtered_df["description"].astype(str))
-    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
-    st.subheader("Word Cloud of Task Descriptions")
-    fig, ax = plt.subplots(figsize=(10, 5))  # Create a Matplotlib figure and axes
-    ax.imshow(wordcloud, interpolation="bilinear")
-    ax.axis("off")
-    st.pyplot(fig)  # Pass the figure object to st.pyplot()
+    # Activity heatmap
+    filtered_df["weekday"] = filtered_df["started_at"].dt.day_name()
+    filtered_df["hour"] = filtered_df["started_at"].dt.hour
+    heatmap_data = filtered_df.pivot_table(
+    index="weekday", columns="hour", values="minutes", aggfunc="sum", fill_value=0
+    )
+
+    # Optional: reorder weekdays
+    ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    heatmap_data = heatmap_data.reindex(ordered_days)
+    st.subheader("Heatmap of Activity (Minutes Logged by Hour and Day)")
+    fig, ax = plt.subplots(figsize=(12, 5))
+    sns.heatmap(heatmap_data, cmap="YlGnBu", ax=ax)
+    st.pyplot(fig)
 
 with tab3:
     st.subheader("User Analysis")
@@ -168,6 +202,12 @@ with tab3:
     avg_feedback = filtered_df.groupby("user_first_name")["user_feedbacks_average"].mean().sort_values(ascending=False)
     st.subheader("Average User Feedback")
     st.bar_chart(avg_feedback)
+    st.subheader("User Drilldown")
+    selected_user = st.selectbox("Select a User to View Their Logs", options=filtered_df["user_first_name"].unique())
+    user_df = filtered_df[filtered_df["user_first_name"] == selected_user]
+    
+    st.write(f"Total entries for {selected_user}: {user_df.shape[0]}")
+    st.dataframe(user_df[["started_at", "task", "minutes", "description"]])
 
 with tab4:
     st.subheader("Detailed Worklog View")

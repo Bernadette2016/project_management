@@ -191,7 +191,7 @@ st.sidebar.metric("Number of Log Entries", num_log_entries)
 st.sidebar.metric("Unique Tasks Performed", num_unique_tasks)
 
 # --- Tabbed Content ---
-tab1, tab2, tab3, tab4 = st.tabs(["Raw Data", "Task Analysis", "User Analysis", "Detailed View"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Raw Data", "Task Analysis", "Logged Time by Weekday", "WordCloud", "User Analysis"])
 
 with tab1:
     st.subheader("Raw Worklog Data")
@@ -199,13 +199,11 @@ with tab1:
 
 with tab2:
     st.subheader("Task Analysis")
-
     # Time spent per task
     task_minutes = filtered_df.groupby("task")["minutes"].sum().sort_values(ascending=False)
     task_hours = round(task_minutes / 60, 2)
     st.subheader("Total Time Spent per Task (Hours)")
     st.bar_chart(task_hours)
-    
     # Daily time spent trend
     filtered_df["day"] = filtered_df["started_at"].dt.date
     daily_hours = filtered_df.groupby("day")["minutes"].sum() / 60
@@ -219,6 +217,7 @@ with tab2:
     index="weekday", columns="hour", values="minutes", aggfunc="sum", fill_value=0
     )
 
+with tab3:
     st.subheader("Logged Time by Weekday")
     # --- User Filter ---
     user_options = combined_df["user_first_name"].dropna().unique()
@@ -236,6 +235,7 @@ with tab2:
     # Step 4: Plot bar chart
     st.bar_chart(weekday_hours)
 
+with tab4:
     # Word Cloud of Task Descriptions
     text = " ".join(filtered_df["description"].astype(str))
     wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
@@ -245,7 +245,7 @@ with tab2:
     ax.axis("off")
     st.pyplot(fig)  # Pass the figure object to st.pyplot()
 
-with tab3:
+with tab5:
     st.subheader("User Analysis")
     # Time spent per user
     user_minutes = filtered_df.groupby("user_first_name")["minutes"].sum().sort_values(ascending=False)
@@ -263,9 +263,3 @@ with tab3:
     
     st.write(f"Total entries for {selected_user}: {user_df.shape[0]}")
     st.dataframe(user_df[["started_at", "task", "minutes", "description"]])
-
-with tab4:
-    st.subheader("Detailed Worklog View")
-    # You can add more detailed visualizations or tables here
-    # For example, a table showing all entries with descriptions
-    st.dataframe(filtered_df[["started_at", "user_first_name", "task", "minutes", "description"]])

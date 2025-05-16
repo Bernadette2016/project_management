@@ -199,67 +199,73 @@ with tab1:
 
 with tab2:
     st.subheader("Task Analysis")
-    # Time spent per task
-    task_minutes = filtered_df.groupby("task")["minutes"].sum().sort_values(ascending=False)
-    task_hours = round(task_minutes / 60, 2)
-    st.subheader("Total Time Spent per Task (Hours)")
-    st.bar_chart(task_hours)
-    # Daily time spent trend
-    filtered_df["day"] = filtered_df["started_at"].dt.date
-    daily_hours = filtered_df.groupby("day")["minutes"].sum() / 60
-    st.subheader("Daily Time Spent (Hours)")
-    st.line_chart(daily_hours)
+    task_tab1, task_tab2, task_tab3 = st.tabs(["Time Spent per Task", "Daily Time Trend", "Activity Heatmap"])
 
-    # Activity heatmap
-    filtered_df["weekday"] = filtered_df["started_at"].dt.day_name()
-    filtered_df["hour"] = filtered_df["started_at"].dt.hour
-    heatmap_data = filtered_df.pivot_table(
-    index="weekday", columns="hour", values="minutes", aggfunc="sum", fill_value=0
-    )
+    with task_tab1:
+        task_minutes = filtered_df.groupby("task")["minutes"].sum().sort_values(ascending=False)
+        task_hours = round(task_minutes / 60, 2)
+        st.subheader("Total Time Spent per Task (Hours)")
+        st.bar_chart(task_hours)
+
+    with task_tab2:
+        filtered_df["day"] = filtered_df["started_at"].dt.date
+        daily_hours = filtered_df.groupby("day")["minutes"].sum() / 60
+        st.subheader("Daily Time Spent (Hours)")
+        st.line_chart(daily_hours)
+
+    with task_tab3:
+        filtered_df["weekday"] = filtered_df["started_at"].dt.day_name()
+        filtered_df["hour"] = filtered_df["started_at"].dt.hour
+        heatmap_data = filtered_df.pivot_table(
+            index="weekday", columns="hour", values="minutes", aggfunc="sum", fill_value=0
+        )
+        ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        heatmap_data = heatmap_data.reindex(ordered_days)
+        st.subheader("Heatmap of Activity (Minutes Logged by Hour and Day)")
+        fig, ax = plt.subplots(figsize=(12, 5))
+        sns.heatmap(heatmap_data, cmap="YlGnBu", ax=ax)
+        st.pyplot(fig)
 
 with tab3:
     st.subheader("Logged Time by Weekday")
-    # --- User Filter ---
     user_options = combined_df["user_first_name"].dropna().unique()
     selected_user = st.selectbox("Select a User", options=sorted(user_options))
-    # Filter the data by selected user
     user_df = combined_df[combined_df["user_first_name"] == selected_user].copy()
-    # Step 1: Prepare data
     user_df["weekday"] = user_df["started_at"].dt.day_name()
     weekday_minutes = user_df.groupby("weekday")["minutes"].sum()
-    # Step 2: Reorder weekdays
     ordered_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     weekday_minutes = weekday_minutes.reindex(ordered_days).fillna(0)
-    # Step 3: Convert to hours and round
     weekday_hours = (weekday_minutes / 60).round(2)
-    # Step 4: Plot bar chart
     st.bar_chart(weekday_hours)
 
 with tab4:
-    # Word Cloud of Task Descriptions
     text = " ".join(filtered_df["description"].astype(str))
     wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
     st.subheader("Word Cloud of Task Descriptions")
-    fig, ax = plt.subplots(figsize=(10, 5))  # Create a Matplotlib figure and axes
+    fig, ax = plt.subplots(figsize=(10, 5))
     ax.imshow(wordcloud, interpolation="bilinear")
     ax.axis("off")
-    st.pyplot(fig)  # Pass the figure object to st.pyplot()
+    st.pyplot(fig)
 
 with tab5:
     st.subheader("User Analysis")
-    # Time spent per user
-    user_minutes = filtered_df.groupby("user_first_name")["minutes"].sum().sort_values(ascending=False)
-    user_hours = round(user_minutes / 60, 2)
-    st.subheader("Total Time Spent per User (Hours)")
-    st.bar_chart(user_hours)
+    user_tab1, user_tab2, user_tab3 = st.tabs(["Time Spent", "Average Feedback", "User Drilldown"])
 
-    # Average feedback per user
-    avg_feedback = filtered_df.groupby("user_first_name")["user_feedbacks_average"].mean().sort_values(ascending=False)
-    st.subheader("Average User Feedback")
-    st.bar_chart(avg_feedback)
-    st.subheader("User Drilldown")
-    selected_user = st.selectbox("Select a User to View Their Logs", options=filtered_df["user_first_name"].unique())
-    user_df = filtered_df[filtered_df["user_first_name"] == selected_user]
-    
-    st.write(f"Total entries for {selected_user}: {user_df.shape[0]}")
-    st.dataframe(user_df[["started_at", "task", "minutes", "description"]])
+    with user_tab1:
+        user_minutes = filtered_df.groupby("user_first_name")["minutes"].sum().sort_values(ascending=False)
+        user_hours = round(user_minutes / 60, 2)
+        st.subheader("Total Time Spent per User (Hours)")
+        st.bar_chart(user_hours)
+
+    with user_tab2:
+        avg_feedback = filtered_df.groupby("user_first_name")["user_feedbacks_average"].mean().sort_values(ascending=False)
+        st.subheader("Average User Feedback")
+        st.bar_chart(avg_feedback)
+
+    with user_tab3:
+        st.subheader("User Drilldown")
+        selected_user = st.selectbox("Select a User to View Their Logs", options=filtered_df["user_first_name"].unique())
+        user_df = filtered_df[filtered_df["user_first_name"] == selected_user]
+        st.write(f"Total entries for {selected_user}: {user_df.shape[0]}")
+        st.dataframe(user_df[["started_at", "task", "minutes", "description"]])
+

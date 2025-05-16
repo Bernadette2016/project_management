@@ -217,6 +217,15 @@ with tab2:
     sns.heatmap(heatmap_data, cmap="YlGnBu", ax=ax)
     st.pyplot(fig)
 
+        # Word Cloud of Task Descriptions
+    text = " ".join(filtered_df["description"].astype(str))
+    wordcloud = WordCloud(width=800, height=400, background_color="white").generate(text)
+    st.subheader("Word Cloud of Task Descriptions")
+    fig, ax = plt.subplots(figsize=(10, 5))  # Create a Matplotlib figure and axes
+    ax.imshow(wordcloud, interpolation="bilinear")
+    ax.axis("off")
+    st.pyplot(fig)  # Pass the figure object to st.pyplot()
+
 with tab3:
     st.subheader("User Analysis")
 

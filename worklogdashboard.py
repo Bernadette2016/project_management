@@ -163,27 +163,28 @@ with col3:
     num_unique_tasks = filtered_df["task"].nunique()
     st.metric("Unique Tasks Performed", num_unique_tasks)
 
-# Get last 7 days of logs
+# Weekly Goal Progress Section
 st.subheader("Weekly Goal Progress")
 # Weekly target input
 weekly_target = st.number_input("Set Weekly Target (Hours)", min_value=1, value=40)
-# Get week selection from user
-filtered_df["week"] = filtered_df["started_at"].dt.isocalendar().week
-week_list = sorted(filtered_df["week"].unique())
-selected_week = st.selectbox("Select Week Number", week_list)
+# Ask the user to select a week by choosing a start date
+default_start = filtered_df["started_at"].min().date()
+selected_start_date = st.date_input("Select Start Date of the Week", default_start)
+# Define the week's date range (7 days)
+selected_end_date = selected_start_date + pd.Timedelta(days=6)
 # Filter data for selected week
-week_df = filtered_df[filtered_df["week"] == selected_week]
+week_df = filtered_df[
+    (filtered_df["started_at"].dt.date >= selected_start_date) &
+    (filtered_df["started_at"].dt.date <= selected_end_date)
+]
 # Calculate progress
 weekly_logged_minutes = week_df["minutes"].sum()
 weekly_logged = round(weekly_logged_minutes / 60, 2)
 progress = min(weekly_logged / weekly_target, 1.0)
-# Show progress bar
+# Display metrics and progress
 st.metric("Logged Hours This Week", weekly_logged)
 st.progress(progress)
-
-
-st.progress(progress)
-st.write(f"Logged {weekly_logged:.2f} / {weekly_target} hours this week")
+st.write(f"Logged {weekly_logged:.2f} / {weekly_target} hours from {selected_start_date} to {selected_end_date}")
 
 
 st.sidebar.metric("Total Logged Hours", total_logged_hours)
